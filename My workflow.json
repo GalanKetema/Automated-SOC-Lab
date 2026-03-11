@@ -1,0 +1,132 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "events": [
+          "case_create"
+        ],
+        "options": {}
+      },
+      "type": "n8n-nodes-base.theHiveProjectTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "f93a73a2-0325-4a30-a3ed-ab263fa19b3b",
+      "name": "TheHive Trigger",
+      "webhookId": "c53641f2-b16f-4d57-b6b2-3107d11e6251"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.details.title }}{{ $json.body.details.description }}",
+        "options": {
+          "systemMessage": "\"You are a helpful Security Assistant. I will send you information about a security case from TheHive.\n\nIf the text is not in English, translate it to English.\n\nWrite a 2-sentence summary of what happened.\n\nTell me if it looks 'Dangerous' or 'Safe'.\""
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        192,
+        32
+      ],
+      "id": "97f6855b-c959-4d43-9d3d-ecc09a184a03",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        160,
+        240
+      ],
+      "id": "2352bc7b-287d-416f-8957-92de342a4aec",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "3rcoE4NrgfkKgxhR",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "comment",
+        "addTo": "case",
+        "id": {
+          "__rl": true,
+          "value": "={{ $('TheHive Trigger').item.json.body.details.number }}",
+          "mode": "id"
+        },
+        "message": "={{ $json.output }}"
+      },
+      "type": "n8n-nodes-base.theHiveProject",
+      "typeVersion": 1,
+      "position": [
+        544,
+        32
+      ],
+      "id": "25f1fb82-5c89-40a3-b041-a99627a69a71",
+      "name": "Create a comment in a case or alert",
+      "credentials": {
+        "theHiveProjectApi": {
+          "id": "o3vBMYTqjSA2Cx19",
+          "name": "The Hive 5 account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "TheHive Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Create a comment in a case or alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "2d1ab5be-ebb1-42a6-b916-2aba331adc8a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "db1e89b19161f704bfe4eb9b46a119267a783fe97a1d2226d56bbc5de793fab0"
+  },
+  "id": "auf8M4dCjLNHLdNuv4Lhe",
+  "tags": []
+}
